@@ -1,644 +1,522 @@
-openapi: 3.0.3
-info:
-  title: Flee Backend API - OpenAPI 3.0
-  description: Flee Backend API Documentation
-  contact:
-    email: tharunvind@gmail.com
-  version: 1.0.1
+openapi: 3.0.0
 servers:
-  - url: http://localhost:3000/api/v1
-tags:
-  - name: Permit
-    description: Everything about Permit
-  - name: User
-    description: Everything about User
-  - name: System
-    description: Everything about System
+  - description: LinkedList API
+    url: http://localhost:3000/api/v1
+info:
+  description: LinkedList-API
+  version: 1.0.0
+  title: LinkedList API
+
 paths:
-  /populate/create:
+  /admin/users/register:
     post:
       tags:
-        - Permit
+        - Admin
       security:
         - bearerAuth: []
-      summary: Creates a new outpass
-      description: This API  creates a new outpass. This API is consumed by the student component. It requires Student JWT.
-      requestBody:
-        description: creates a new pass
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - id
-                - name
-                - phoneNumber
-                - outTime
-                - inTime
-                - inVerified
-                - outVerified
-                - purpose
-              properties:
-                id:
-                  type: string
-                  example: 2020bcs0066
-                name:
-                  type: string
-                  example: Tharun Vemula
-                phoneNumber:
-                  type: string
-                  example: '6301930763'
-                outTime:
-                  type: string
-                  example: '2023-02-11T18:30:00.000Z'
-                inTime:
-                  type: string
-                  example: '2023-02-11T18:30:00.000Z'
-                purpose:
-                  type: number
-                  example: 0
+      summary: Creates a user
+      description: |
+        Creates a user.
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: created user object
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Permit'
-  /populate/verify:
-    post:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Access token is missing or invalid
+
+  /admin/users:
+    get:
       tags:
-        - Permit
+        - Admin
       security:
         - bearerAuth: []
-      summary: Verifies Outpass at the Security
-      description: In Verification and Out Verification API. This API is consumed by the Security Component. It requries Security JWT
-      requestBody:
-        description: verifies a new pass
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  example: <ObjectID>
-                type:
-                  type: number
-                  example: 0
+      summary: Fetches all users of the orginisation
       responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Permit'
-        '400':
-          description: Invalid status value
-  /populate/remark:
-    post:
-      tags:
-        - Permit
-      security:
-        - bearerAuth: []
-      summary: Sets remark
-      description: Increments Remarks score by 1.
-      requestBody:
-        description: Increments Remarks score by 1 of a student.
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  example: 2020bcs0066
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Student'
-        '400':
-          description: Invalid tag value
-  /populate/outgoing:
-    post:
-      tags:
-        - Permit
-      security:
-        - bearerAuth: []
-      summary: Fectches Students from - to date
-      description: Returns an array of Students going out in between dates. This API is consumed by the Security Component. It requires Security JWT
-      requestBody:
-        description: Returns an array of Students going out in between dates
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                date:
-                  type: string
-                  example: '2011-10-05T14:48:00.000Z'
-                hostel:
-                  type: string
-                  example: 'h2'
-      responses:
-        '200':
-          description: successful operation
+        "200":
+          description: an array of users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Permit'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Permit not found
+                  $ref: "#/components/schemas/User"
+  /admin/jobs:
+    get:
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      summary: Fetches jobs for admin dashboard
+      responses:
+        "200":
+          description: a School object
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref : "#/components/schemas/Job"
+
+  /admin/applications/download:
+    get:
+      tags : 
+        - Admin
+      security:
+        - bearerAuth: []
+      summary: Fetches applicants for a job
+      parameters:
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          required: true
+          description: ID of the job
+      responses:
+        "200":
+          description: an array of applicant objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref : "#/components/schemas/Application"  
+
+  /admin/applications:  
+    get:
+      tags : 
+        - Admin
+      security:
+        - bearerAuth: []
+      summary: Fetches application of a user
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: an array of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref : "#/components/schemas/Application"
+  
   /auth/login:
     post:
       tags:
-        - User
+        - Auth
       security:
         - bearerAuth: []
-      summary: Authenticates an User
-      description: Returns a payload containing user data
+      summary: Authenticates a User
       requestBody:
-        description: Returns a payload containing user data
         content:
           application/json:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  example: 2020bcs0066
+                id : 
+                  type : string
                 password:
                   type: string
-                  example: '123456'
       responses:
-        '200':
-          description: successful operation
+        "200":
+          description: a School object
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
+                  user:
+                    type: object
+                  profile:
+                    type: object
+                  token:
                     type: string
-                  name:
-                    type: string
-                    example: theUser
-                  password:
-                    type: string
-                    example: '12345'
-                  role:
-                    type: number
-                    example: 0
-                xml:
-                  name: user
-  /system:
-    get:
-      tags:
-        - System
-      summary: get status of the system
-      description: Returns the status of the System. It is open API.
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: number
-                    example: 34
-                  allow:
-                    type: boolean
-                    example: true
-                  threshold:
-                    type: number
-                    example: 3
-  /admin/system:
-    post:
-      tags:
-        - System
-      security:
-        - bearerAuth: []
-      summary: sets the status of the system.
-      description: Returns the status of the System. Only the admin can consume the API. It requires Admin JWT
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: number
-                    example: 34
-                  allow:
-                    type: boolean
-                    example: true
-                  threshold:
-                    type: number
-                    example: 3
-  /populate/profile:
-    get:
-      tags:
-        - User
-      security:
-        - bearerAuth: []
-      summary: get the student details ie previous outpass data
-      description: Returns the students data. Used for refreshing. This API is consumed by the Student Component. It requires Student JWT.
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Permit'
-                xml:
-                  name: user
-  /populate/allow:
-    get:
-      tags:
-        - User
-      security:
-        - bearerAuth: []
-      summary: get the student status - Internal API
-      description: Internal API to check the status of student. Returns a boolean that indicates if the student can request auto generated outpass.This API is consumed by the Student Component. It requires Student JWT.
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: true
-                xml:
-                  name: user
-  /populate/student/all:
-    post:
-      tags:
-        - User
-      security:
-        - bearerAuth: []
-      summary: get all students under the warden
-      description: fetches students under the warden. This API is consumed by Warden Component. It requires Warden JWT.
-      requestBody:
-        description: Returns a payload containing student under the warden
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        default:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Student'
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Student'
-                xml:
-                  name: user
-  /populate/student/status:
-    post:
-      tags:
-        - User
-      security:
-        - bearerAuth: []
-      summary: Sets status for a student
-      description: Warden can set status to a student. This API is consumed by Warden Component. It requires Warden JWT.
-      requestBody:
-        description: Returns a payload containing user data
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  example: 2020bcs0066
-                status:
-                  type: boolean
-                  example: true
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Student'
-        default:
-          description: successful operation
-  /populate/student/history:
-    post:
-      tags:
-        - User
-      security:
-        - bearerAuth: []
-      summary: gets history of a student
-      description: Warden can view history of a student. This API is consumed by Warden Component. It requires Warden JWT.
-      requestBody:
-        description: Returns a payload containing user data
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  example: 2020bcs0066
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Student'
-        default:
-          description: successful operation
-  /populate/location:
-    get:
-      tags:
-        - User
-      security:
-        - bearerAuth: []
-      summary: gets current location of a student
-      description: gets current location of a student . In - 0 / Out - 1. It requires Student JWT.
-      responses:
-        '200':
-          description: Returns an object with only key, status set to either 0 or 1
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: true
-        default:
-          description: successful operation
-  /populate/hostel/outgoing:
-    post:
-      tags:
-        - Permit
-      security:
-        - bearerAuth: []
-      summary: Fectches Students from - to date
-      description: Returns an array of Students going out in between dates. This API is consumed by the Warden Component. It requires Warden JWT
-      requestBody:
-        description: Returns an array of Students going out in between dates
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                date:
-                  type: string
-                  example: '2011-10-05T14:48:00.000Z'
-                hostel:
-                  type: string
-                  example: 'h2'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Permit'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Permit not found
 
-  /populate/hostel/approve:
-    post:
+  /job:
+    get:
       tags:
-        - User
+        - Job
       security:
         - bearerAuth: []
-      summary: Verifies Pending Verification Outpasses
-      description: Approves/Rejects outpasses that are not auto approved
-      requestBody:
-        description: verifies a new pass
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  example: <ObjectID>
+      summary: fetches all jobs for user dashboard
+      description: Fetches all Jobs for user dashboard
       responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Permit'
-        '400':
-          description: Invalid status value
-  /populate/hostel/blocked:
-    post:
-      tags:
-        - Permit
-      security:
-        - bearerAuth: []
-      summary: Fectches blacklisted students
-      description: Returns an array of blacklisted Students of that hostel It requires Warden JWT
-      requestBody:
-        description: Returns an array of Students going out in between dates
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                hostel:
-                  type: string
-                  example: 'h2'
-      responses:
-        '200':
-          description: successful operation
+        "200":
+          description: An array of job objects (not including posts)
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Student'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Permit not found
-  /populate/hostel/pending:
+                  $ref: "#/components/schemas/Job"
+        "401":
+          description: Access token is missing or invalid
+
+  /job/create:
     post:
       tags:
-        - Permit
+        - Job
       security:
         - bearerAuth: []
-      summary: Fectches pending outpasses
-      description: Returns an array of outpasses whose approval is pending.It requires Warden JWT
+      summary: creates a job object
       requestBody:
-        description: Returns an array of outpasses
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Job"
+      responses:
+        "200":
+          description: created object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /job/update:
+    put:
+      tags:
+        - Job
+      security:
+        - bearerAuth: []
+      summary: updates a job object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Job"
+      responses:
+        "200":
+          description: created object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /job/delete:
+    delete:
+      tags:
+        - Job
+      security:
+        - bearerAuth: []
+      summary: deletes a job object 
+      requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                hostel:
+                jobId:
                   type: string
-                  example: 'h2'
       responses:
-        '200':
-          description: successful operation
+        "204":
+          description: a Vehicle object
+        "401":
+          description: Access token is missing or invalid
+  
+  /post:
+    get:
+      tags:
+        - Post
+      security:
+        - bearerAuth: []
+      summary: fetches all posts
+      description: Fetches all Jobs
+      responses:
+        "200":
+          description: An array of post objects (not including jobs)
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Permit'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Permit not found
+                  $ref: "#/components/schemas/Post"
+        "401":
+          description: Access token is missing or invalid
+
+  /post/create:
+    post:
+      tags:
+        - Post
+      security:
+        - bearerAuth: []
+      summary: creates a post object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Post"
+      responses:
+        "200":
+          description: created object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+
+  /post/update:
+    put:
+      tags:
+        - Post
+      security:
+        - bearerAuth: []
+      summary: updates a post object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Post"
+      responses:
+        "200":
+          description: created object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+
+  /post/delete:
+    delete:
+      tags:
+        - Post
+      security:
+        - bearerAuth: []
+      summary: deletes a post object 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                jobId:
+                  type: string
+      responses:
+        "401":
+          description: Access token is missing or invalid
+
+
+
+  /profile:
+    get:
+      security:
+        - bearerAuth: []
+      tags: 
+        - Profile
+      summary: Fetches current user profile
+      responses:
+        "200":
+          description: a profile object
+          content:
+            application/json:
+              schema:
+                type : array
+                items:
+                  $ref: "#/components/schemas/Profile"                  
+        "401":
+          description: Access token is missing or invalid
+
+  /profile/create:
+    post:
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      summary: creates a profile for a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Profile"                
+      responses:
+        "200":
+          description: a user profile object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"                  
+        "401":
+          description: Access token is missing or invalid
+
+  /profile/update:
+    put:
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      summary: updates a user profile
+      description: updates a profile.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Profile"                
+      responses:
+        "200":
+          description: a Vehicle object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"                  
+        "401":
+          description: Access token is missing or invalid
+    
+    
+    
+  /applications/submit:
+    post:
+      tags:
+        - Application
+      security:
+        - bearerAuth: []
+      summary: submit an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: "#/components/schemas/Application"
+      responses:
+        "200":
+          description: an application object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "401":
+          description: Access token is missing or invalid
+
+  /application/delete:
+    delete:
+      tags:
+        - Application
+      security:
+        - bearerAuth: []
+      summary: deletes an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: string
+                userId:
+                  type: string
+      responses:
+        "204":
+          description: deleted object
+        "401":
+          description: Access token is missing or invalid
+
+  /applications:
+    get:
+      tags:
+        - Application
+      security:
+        - bearerAuth: []
+      summary: fetches applications of a student
+      responses:
+        "200":
+          description: an array of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+        "401":
+          description: Access token is missing or invalid
+
+
 components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
-    Permit:
+
+    Application:
       type: object
-      required:
-        - id
-        - name
-        - phoneNumber
-        - outTime
-        - inTime
-        - isInVerified
-        - isOutVerified
-        - purpose
       properties:
-        id:
+        applicationId:
           type: string
-          example: 2020bcs0066
-        name:
+        jobId:
           type: string
-          example: Tharun Vemula
+        userId:
+          type: string
+        dateApplied: 
+          type: string
+        status:
+          type: string
+        
+    Job:
+      type: object
+      properties:
+        jobId:
+          type: string
+        company:
+          type: string
+        body:
+          type: string
+        expired: 
+          type: boolean
+        deadline: 
+          type: string
+
+
+    Post:
+      type: object
+      properties:
+        body :
+          type: string
+
+
+
+    Profile:
+      type: object
+      properties:
+        userId:
+          type: string
+        summary:
+          type: string
+        location:
+          type: string
+        dateOfBirth: 
+          type: string
+        gpa:
+          type: number
+        gender:
+          type: string
+        resume:
+          type: string
+        email:
+          type: string
         phoneNumber:
           type: string
-          example: '6301930763'
-        outTime:
+        yearOfGradutation:
           type: string
-          example: '2023-02-11T18:30:00.000Z'
-        verifiedOutTime:
-          type: string
-          example: '2023-02-11T18:30:00.000Z'
-        verifiedInTime:
-          type: string
-          example: '2023-02-11T18:30:00.000Z'
-        inTime:
-          type: string
-          example: '2023-02-11T18:30:00.000Z'
-        isInVerified:
-          type: boolean
-          example: false
-        isOutVerified:
-          type: boolean
-          example: false
-        purpose:
-          type: number
-          example: 0
-        inApprovedBy:
-          type: string
-          example: Security 1
-        outApprovedBy:
-          type: string
-          example: Security 1
+        branch: 
+          type: string        
+
     User:
       type: object
-      required:
-        - id
-        - name
-        - password
-        - role
       properties:
-        id:
+        userId:
           type: string
-        name:
+        firstName:
           type: string
-          example: theUser
+        lastName:
+          type: string
         password:
           type: string
-          example: '12345'
-        role:
-          type: number
-          example: 0
-      xml:
-        name: user
-    Student:
-      allOf:
-        - ref: '#/components/schema/User'
-        - type: object
-          required:
-            - status
-            - remarkScore
-            - hostel
-            - gender
-            - inCampus
-          properties:
-            status:
-              type: boolean
-              example: true
-            remarkScore:
-              type: number
-              example: 0
-            hostel:
-              type: string
-              example: h2
-            gender:
-              type: string
-              example: male
-            inCampus:
-              type: number
-              example: 0
-    Security:
-      allOf:
-        - ref: '#/components/schema/User'
-        - type: object
-    Warden:
-      allOf:
-        - ref: '#/components/schema/User'
-        - type: object
-          required:
-            - hostel
-          properties:
-            hostel:
-              type: string
-              example: h1
-    System:
-      type: object
-      properties:
-        id:
-          type: number
-          example: 34
-        allow:
-          type: boolean
-          example: true
-        threshold:
-          type: number
-          example: 3
+        kind:
+          type: string
+        
