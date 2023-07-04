@@ -368,7 +368,7 @@ paths:
     
     
     
-  /applications/submit:
+  /application/submit:
     post:
       tags:
         - Application
@@ -413,7 +413,7 @@ paths:
         "401":
           description: Access token is missing or invalid
 
-  /applications:
+  /application:
     get:
       tags:
         - Application
