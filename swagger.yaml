@@ -8,13 +8,13 @@ info:
   title: LinkedList API
 
 paths:
-  /admin/users/register:
+  /users/register:
     post:
       tags:
-        - Admin
+        - User
       security:
         - bearerAuth: []
-      summary: Creates a user
+      summary: Creates a user. Only admin has this previlege
       description: |
         Creates a user.
       responses:
@@ -27,13 +27,19 @@ paths:
         "401":
           description: Access token is missing or invalid
 
-  /admin/users:
+  /users:
     get:
       tags:
-        - Admin
+        - User
       security:
         - bearerAuth: []
-      summary: Fetches all users of the orginisation
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: ID of the user
+      summary: Fetches all users of the orginisation or by its Id
       responses:
         "200":
           description: an array of users
@@ -43,27 +49,89 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
-  /admin/jobs:
-    get:
+  /users/update:
+    put:
       tags:
-        - Admin
+        - User
       security:
         - bearerAuth: []
-      summary: Fetches jobs for admin dashboard
+      summary: updates a user 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
       responses:
         "200":
-          description: a School object
+          description: updated user
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref : "#/components/schemas/Job"
+                  $ref: "#/components/schemas/User"
+  /users/delete:
+    delete:
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      summary: deletes a user 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                userId:
+                  type: string
+      responses:
+        "200":
+          description: updated user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
 
-  /admin/applications/download:
+  /dashboard/admin:
+    get:
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      summary: Fetches all posts and jobs for admin dashboard
+      responses:
+        "200":
+          description: Fetches all posts and jobs for admin dashboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref : "#/components/schemas/Post"
+  /dashboard/user:
+    get:
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      summary: Fetches all posts and jobs for user dashboard. Applied jobs are not included
+      responses:
+        "200":
+          description: Fetches all posts and jobs for user dashboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref : "#/components/schemas/Post"
+
+  /applications/job:
     get:
       tags : 
-        - Admin
+        - Application
       security:
         - bearerAuth: []
       summary: Fetches applicants for a job
@@ -84,13 +152,13 @@ paths:
                 items:
                   $ref : "#/components/schemas/Application"  
 
-  /admin/applications:  
+  /applications/user:  
     get:
       tags : 
-        - Admin
+        - Application
       security:
         - bearerAuth: []
-      summary: Fetches application of a user
+      summary: Fetches applications of a user
       parameters:
         - in: query
           name: userId
@@ -139,15 +207,21 @@ paths:
                     type: object
                   token:
                     type: string
-
-  /job:
+  
+  /jobs:
     get:
       tags:
         - Job
       security:
         - bearerAuth: []
-      summary: fetches all jobs for user dashboard
-      description: Fetches all Jobs for user dashboard
+      parameters:
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          description: ID of the job
+      summary: fetches all jobs or a single job object whose id is specified
+      description: fetches all jobs or a single job object whose id is specified
       responses:
         "200":
           description: An array of job objects (not including posts)
@@ -160,7 +234,7 @@ paths:
         "401":
           description: Access token is missing or invalid
 
-  /job/create:
+  /jobs/create:
     post:
       tags:
         - Job
@@ -180,7 +254,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Job"
 
-  /job/update:
+  /jobs/update:
     put:
       tags:
         - Job
@@ -200,35 +274,44 @@ paths:
               schema:
                 $ref: "#/components/schemas/Job"
 
-  /job/delete:
+  /jobs/delete:
     delete:
       tags:
         - Job
       security:
         - bearerAuth: []
       summary: deletes a job object 
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                jobId:
-                  type: string
+      parameters:
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          description: ID of the job
+          required: true
       responses:
-        "204":
+        "200":
           description: a Vehicle object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
         "401":
           description: Access token is missing or invalid
   
-  /post:
+  /posts:
     get:
       tags:
         - Post
       security:
         - bearerAuth: []
       summary: fetches all posts
-      description: Fetches all Jobs
+      parameters:
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          description: ID of the post
+      description: Fetches all posts
       responses:
         "200":
           description: An array of post objects (not including jobs)
@@ -288,14 +371,12 @@ paths:
       security:
         - bearerAuth: []
       summary: deletes a post object 
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                jobId:
-                  type: string
+      parameters:
+        - in: query
+          name: jobId
+          schema:
+            type: string
+          description: ID of the post
       responses:
         "401":
           description: Access token is missing or invalid
@@ -368,7 +449,7 @@ paths:
     
     
     
-  /application/submit:
+  /applications/submit:
     post:
       tags:
         - Application
@@ -413,7 +494,7 @@ paths:
         "401":
           description: Access token is missing or invalid
 
-  /application:
+  /applications:
     get:
       tags:
         - Application
