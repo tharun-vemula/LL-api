@@ -337,7 +337,7 @@ paths:
           required: true
       responses:
         "200":
-          description: a Vehicle object
+          description: a job object
           content:
             application/json:
               schema:
@@ -486,7 +486,7 @@ paths:
               $ref: "#/components/schemas/Profile"                
       responses:
         "200":
-          description: a Vehicle object
+          description: a profile object
           content:
             application/json:
               schema:
@@ -515,11 +515,13 @@ paths:
 
       responses:
         "200":
-          description: a Vehicle object
+          description: an array of post objects
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Profile"                  
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"                  
         "401":
           description: Access token is missing or invalid
       
