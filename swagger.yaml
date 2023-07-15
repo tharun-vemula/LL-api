@@ -39,7 +39,7 @@ paths:
           schema:
             type: string
           description: ID of the user
-      summary: Fetches all users of the orginisation or by its Id
+      summary: Fetches all users of the orginisation or by userId. Only admin has this previlege
       responses:
         "200":
           description: an array of users
@@ -49,6 +49,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
+
   /users/update:
     put:
       tags:
@@ -56,6 +57,7 @@ paths:
       security:
         - bearerAuth: []
       summary: updates a user 
+      description: Admin can update any user. But a user can update only his own data
       requestBody:
         content:
           application/json:
@@ -76,7 +78,7 @@ paths:
         - User
       security:
         - bearerAuth: []
-      summary: deletes a user 
+      summary: deletes a user. only admin has this previlege
       requestBody:
         content:
           application/json:
@@ -134,7 +136,8 @@ paths:
         - Application
       security:
         - bearerAuth: []
-      summary: Fetches applicants for a job
+      summary: Fetches applicants for a job. Only Admin previlege
+      description: Applicants of a job can be fetched by passing jobId and admin JWT
       parameters:
         - in: query
           name: jobId
@@ -158,13 +161,13 @@ paths:
         - Application
       security:
         - bearerAuth: []
-      summary: Fetches applications of a user
+      summary: Fetches applications of a user. Both User and Admin can use.
+      description: User and Admin can access this api. Admin has access to all users' applications and user can access only his applications
       parameters:
         - in: query
           name: userId
           schema:
             type: string
-          required: true
           description: ID of the user
       responses:
         "200":
@@ -175,6 +178,50 @@ paths:
                 type: array
                 items:
                   $ref : "#/components/schemas/Application"
+  /applications/submit:
+    post:
+      tags:
+        - Application
+      security:
+        - bearerAuth: []
+      summary: submit an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: "#/components/schemas/Application"
+      responses:
+        "200":
+          description: an application object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "401":
+          description: Access token is missing or invalid
+
+  /application/delete:
+    delete:
+      tags:
+        - Application
+      security:
+        - bearerAuth: []
+      summary: deletes an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: string
+                userId:
+                  type: string
+      responses:
+        "204":
+          description: deleted object
+        "401":
+          description: Access token is missing or invalid
   
   /auth/login:
     post:
@@ -446,72 +493,40 @@ paths:
                 $ref: "#/components/schemas/Profile"                  
         "401":
           description: Access token is missing or invalid
-    
-    
-    
-  /applications/submit:
+  
+  /utils/search:
     post:
       tags:
-        - Application
+        - Utils
       security:
         - bearerAuth: []
-      summary: submit an application
-      requestBody:
-        content:
-          application/json:
-            schema:
-                $ref: "#/components/schemas/Application"
-      responses:
-        "200":
-          description: an application object
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Application"
-        "401":
-          description: Access token is missing or invalid
-
-  /application/delete:
-    delete:
-      tags:
-        - Application
-      security:
-        - bearerAuth: []
-      summary: deletes an application
+      summary: search functionality based on tags
+      description: search functionality based on tags
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                applicationId:
-                  type: string
-                userId:
-                  type: string
-      responses:
-        "204":
-          description: deleted object
-        "401":
-          description: Access token is missing or invalid
+                tags:
+                  type: array
+                  items:
+                    type: string
 
-  /applications:
-    get:
-      tags:
-        - Application
-      security:
-        - bearerAuth: []
-      summary: fetches applications of a student
       responses:
         "200":
-          description: an array of applications
+          description: a Vehicle object
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Application'
+                $ref: "#/components/schemas/Profile"                  
         "401":
           description: Access token is missing or invalid
+      
+    
+    
+    
+
 
 
 components:
@@ -551,6 +566,10 @@ components:
           type: boolean
         deadline: 
           type: string
+        tags:
+          type: array
+          items:
+            type: string
 
 
     Post:
